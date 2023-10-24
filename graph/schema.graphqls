@@ -9,6 +9,18 @@ type Training {
   gym: Gym!
 }
 
+input TrainingCreate {
+  category: String!
+  coast: Int!
+  gymID: ID!
+}
+
+input TrainingUpdate {
+  category: String
+  coast: Int
+  gymID: ID
+}
+
 type Gym {
   id: ID!
   branch: String!
@@ -18,6 +30,22 @@ type Gym {
   slots: Int!
 }
 
+input GymCreate {
+  branch: String!
+  admin: String!
+  phone: String!
+  trainingIDs: [ID!]!
+  slots: Int!
+}
+
+input GymUpdate {
+  branch: String
+  admin: String
+  phone: String
+  trainingIDs: [ID]
+  slots: Int
+}
+
 type Customer {
   id: ID!
   name: String!
@@ -25,22 +53,78 @@ type Customer {
   register: String!
 }
 
-input Purchase {
+input CustomerCreate {
+  name: String!
+  email: String!
+  register: String!
+}
+
+input CustomerUpdate {
+  name: String
+  email: String
+  register: String
+}
+
+type Purchase {
   id: ID!
-  training: Training
+  training: Training!
   customer: Customer!
   coast: Int!
   income: Int!
 }
 
+input PurchaseCreate {
+  training: ID!
+  customer: ID!
+  coast: Int!
+  income: Int!
+}
+
+input PurchaseUpdate {
+  training: ID
+  customer: ID
+  coast: Int
+  income: Int
+}
+
+input PurchaseInput {
+#  training: TrainingInput
+#  customer: CustomerInput
+  coast: Int
+  income: Int
+}
+
 type Query {
   trainings: [Training!]!
+  readTraining(id: ID!): Training!
+
+  gyms: [Gym!]!
+  readGym(id: ID!): Gym!
+
+  readCustomer(id: ID!): Customer!
+
+  purchases(customerId: ID!): [Purchase!]!
+  readPurchase(id: ID!): Purchase!
 }
 
 # Delete
 
 type Mutation {
-  createTraining(category: String!, coast: Int!, gymId: Int!): Training!
+  createTraining(training: TrainingCreate!): Training!
+  updateTraining(training: TrainingUpdate!): Training!
+  deleteTraining(id: ID!): Training!
+
+  createGym(gym: GymCreate!): Gym!
+  updateGym(gym: GymUpdate!): Gym!
+  deleteGym(id: ID!): Gym!
+
+  createCustomer(customer: CustomerCreate!): Customer!
+  updateCustomer(customer: CustomerUpdate!): Customer!
+  deleteCustomer(id: ID!): Customer!
+
+  createPurchase(purchase: PurchaseCreate!): Purchase!
+  updatePurchase(purchase: PurchaseUpdate!): Purchase!
+  deletePurchase(id: ID!): Purchase!
 
   purchaseTraining (trainingId: ID!): Purchase!
 }
