@@ -1,0 +1,46 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Training {
+  id: ID!
+  category: String!
+  coast: Int!
+  gym: Gym!
+}
+
+type Gym {
+  id: ID!
+  branch: String!
+  admin: String!
+  phone: String!
+  trainings: Training!
+  slots: Int!
+}
+
+type Customer {
+  id: ID!
+  name: String!
+  email: String!
+  register: String!
+}
+
+input Purchase {
+  id: ID!
+  training: Training
+  customer: Customer!
+  coast: Int!
+  income: Int!
+}
+
+type Query {
+  trainings: [Training!]!
+}
+
+# Delete
+
+type Mutation {
+  createTraining(category: String!, coast: Int!, gymId: Int!): Training!
+
+  purchaseTraining (trainingId: ID!): Purchase!
+}
