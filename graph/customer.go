@@ -75,14 +75,14 @@ func (r *mutationResolver) UpdateCustomer(ctx context.Context, customer model.Cu
 }
 
 // DeleteCustomer is the resolver for the deleteCustomer field.
-func (r *mutationResolver) DeleteCustomer(ctx context.Context, id string) (*model.Customer, error) {
+func (r *mutationResolver) DeleteCustomer(ctx context.Context, id string) (string, error) {
 	c := model.CustomerDB{ID: id}
 	res := DBConn.Delete(&c)
 	if res.Error != nil {
-		return nil, res.Error
+		return "", res.Error
 	}
 
-	return nil, nil
+	return "Succeed", nil
 }
 
 // ReadCustomer is the resolver for the readCustomer field.

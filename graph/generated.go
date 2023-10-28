@@ -106,14 +106,14 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateTraining(ctx context.Context, training model.TrainingCreate) (*model.Training, error)
 	UpdateTraining(ctx context.Context, training model.TrainingUpdate) (*model.Training, error)
-	DeleteTraining(ctx context.Context, id string) (*model.Training, error)
+	DeleteTraining(ctx context.Context, id string) (string, error)
 	CreateGym(ctx context.Context, gym model.GymCreate) (*model.Gym, error)
 	UpdateGym(ctx context.Context, gym model.GymUpdate) (*model.Gym, error)
-	DeleteGym(ctx context.Context, id string) (*model.Gym, error)
+	DeleteGym(ctx context.Context, id string) (string, error)
 	CreateCustomer(ctx context.Context, customer model.CustomerCreate) (*model.Customer, error)
 	UpdateCustomer(ctx context.Context, customer model.CustomerUpdate) (*model.Customer, error)
-	DeleteCustomer(ctx context.Context, id string) (*model.Customer, error)
-	DeletePurchase(ctx context.Context, id string) (*model.Purchase, error)
+	DeleteCustomer(ctx context.Context, id string) (string, error)
+	DeletePurchase(ctx context.Context, id string) (string, error)
 	PurchaseTraining(ctx context.Context, trainingID string, customerID string) (*model.Purchase, error)
 }
 type QueryResolver interface {
@@ -1534,9 +1534,9 @@ func (ec *executionContext) _Mutation_deleteTraining(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Training)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNTraining2ᚖgymbossᚋgraphᚋmodelᚐTraining(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteTraining(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1546,17 +1546,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteTraining(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Training_id(ctx, field)
-			case "category":
-				return ec.fieldContext_Training_category(ctx, field)
-			case "coast":
-				return ec.fieldContext_Training_coast(ctx, field)
-			case "gym":
-				return ec.fieldContext_Training_gym(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Training", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	defer func() {
@@ -1737,9 +1727,9 @@ func (ec *executionContext) _Mutation_deleteGym(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Gym)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNGym2ᚖgymbossᚋgraphᚋmodelᚐGym(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteGym(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1749,21 +1739,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteGym(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Gym_id(ctx, field)
-			case "branch":
-				return ec.fieldContext_Gym_branch(ctx, field)
-			case "admin":
-				return ec.fieldContext_Gym_admin(ctx, field)
-			case "phone":
-				return ec.fieldContext_Gym_phone(ctx, field)
-			case "trainings":
-				return ec.fieldContext_Gym_trainings(ctx, field)
-			case "slots":
-				return ec.fieldContext_Gym_slots(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Gym", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	defer func() {
@@ -1936,9 +1912,9 @@ func (ec *executionContext) _Mutation_deleteCustomer(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Customer)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNCustomer2ᚖgymbossᚋgraphᚋmodelᚐCustomer(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteCustomer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1948,17 +1924,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteCustomer(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Customer_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Customer_name(ctx, field)
-			case "email":
-				return ec.fieldContext_Customer_email(ctx, field)
-			case "register":
-				return ec.fieldContext_Customer_register(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Customer", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	defer func() {
@@ -2001,9 +1967,9 @@ func (ec *executionContext) _Mutation_deletePurchase(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Purchase)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNPurchase2ᚖgymbossᚋgraphᚋmodelᚐPurchase(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deletePurchase(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2013,19 +1979,7 @@ func (ec *executionContext) fieldContext_Mutation_deletePurchase(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Purchase_id(ctx, field)
-			case "training":
-				return ec.fieldContext_Purchase_training(ctx, field)
-			case "customer":
-				return ec.fieldContext_Purchase_customer(ctx, field)
-			case "coast":
-				return ec.fieldContext_Purchase_coast(ctx, field)
-			case "income":
-				return ec.fieldContext_Purchase_income(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Purchase", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	defer func() {

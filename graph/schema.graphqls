@@ -92,17 +92,17 @@ type Query {
 type Mutation {
   createTraining(training: TrainingCreate!): Training!
   updateTraining(training: TrainingUpdate!): Training!
-  deleteTraining(id: ID!): Training!
+  deleteTraining(id: ID!): String!
 
   createGym(gym: GymCreate!): Gym!
   updateGym(gym: GymUpdate!): Gym!
-  deleteGym(id: ID!): Gym!
+  deleteGym(id: ID!): String!
 
   createCustomer(customer: CustomerCreate!): Customer!
   updateCustomer(customer: CustomerUpdate!): Customer!
-  deleteCustomer(id: ID!): Customer!
+  deleteCustomer(id: ID!): String!
 
-  deletePurchase(id: ID!): Purchase!
+  deletePurchase(id: ID!): String!
   purchaseTraining (trainingId: ID!, customerId: ID!): Purchase!
 
 }

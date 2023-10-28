@@ -83,14 +83,14 @@ func (r *mutationResolver) UpdateGym(ctx context.Context, gym model.GymUpdate) (
 }
 
 // DeleteGym is the resolver for the deleteGym field.
-func (r *mutationResolver) DeleteGym(ctx context.Context, id string) (*model.Gym, error) {
+func (r *mutationResolver) DeleteGym(ctx context.Context, id string) (string, error) {
 	g := model.GymDB{ID: id}
 	res := DBConn.Delete(&g)
 	if res.Error != nil {
-		return nil, res.Error
+		return "", res.Error
 	}
 
-	return nil, nil
+	return "Succeed", nil
 }
 
 // Gyms is the resolver for the gyms field.
@@ -103,12 +103,27 @@ func (r *queryResolver) Gyms(ctx context.Context) ([]*model.Gym, error) {
 
 	var gyms []*model.Gym
 	for _, g := range gs {
+		var ts []model.TrainingDB
+		res = DBConn.Where("gym_id = ?", g.ID).Find(&ts)
+		if res.Error != nil {
+			return nil, res.Error
+		}
+
+		var trainings []*model.Training
+		for _, t := range ts {
+			trainings = append(trainings, &model.Training{
+				ID:       t.ID,
+				Category: t.Category,
+				Coast:    t.Coast,
+				Gym:      nil,
+			})
+		}
 		gyms = append(gyms, &model.Gym{
 			ID:        g.ID,
 			Branch:    g.Branch,
 			Admin:     g.Admin,
 			Phone:     g.Phone,
-			Trainings: nil,
+			Trainings: trainings,
 			Slots:     g.Slots,
 		})
 	}

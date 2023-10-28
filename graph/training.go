@@ -32,7 +32,7 @@ func (r *mutationResolver) CreateTraining(ctx context.Context, training model.Tr
 		Category: training.Category,
 		Coast:    training.Coast,
 		Gym: &model.Gym{
-			ID:        "",
+			ID:        g.ID,
 			Branch:    g.Branch,
 			Admin:     g.Admin,
 			Phone:     g.Phone,
@@ -87,19 +87,19 @@ func (r *mutationResolver) UpdateTraining(ctx context.Context, training model.Tr
 }
 
 // DeleteTraining is the resolver for the deleteTraining field.
-func (r *mutationResolver) DeleteTraining(ctx context.Context, id string) (*model.Training, error) {
+func (r *mutationResolver) DeleteTraining(ctx context.Context, id string) (string, error) {
 	t := model.TrainingDB{ID: id}
 	res := DBConn.Delete(&t)
 	if res.Error != nil {
-		return nil, res.Error
+		return "", res.Error
 	}
-	return nil, nil
+	return "Succeed", nil
 }
 
 // Trainings is the resolver for the trainings field.
 func (r *queryResolver) Trainings(ctx context.Context) ([]*model.Training, error) {
-	ts := []model.TrainingDB{}
-	res := DBConn.First(&ts)
+	var ts []model.TrainingDB
+	res := DBConn.Find(&ts)
 	if res.Error != nil {
 		return nil, res.Error
 	}

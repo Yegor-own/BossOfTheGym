@@ -31,7 +31,7 @@ func (r *mutationResolver) PurchaseTraining(ctx context.Context, trainingID stri
 		}
 	}
 
-	c := model.Customer{ID: customerId}
+	c := model.CustomerDB{ID: customerId}
 	res = DBConn.First(&c)
 	if res.Error != nil {
 		return nil, res.Error
@@ -53,23 +53,40 @@ func (r *mutationResolver) PurchaseTraining(ctx context.Context, trainingID stri
 				Slots:     g.Slots,
 			},
 		},
-		Customer: &c,
-		Coast:    t.Coast,
-		Income:   float64(t.Coast) * 0.8,
+		Customer: &model.Customer{
+			ID:       c.ID,
+			Name:     c.Name,
+			Email:    c.Email,
+			Register: nil,
+		},
+		Coast:  t.Coast,
+		Income: float64(t.Coast) * 0.8,
+	}
+
+	p := model.PurchaseDB{
+		ID:         id,
+		TrainingID: t.ID,
+		CustomerID: c.ID,
+		Coast:      t.Coast,
+		Income:     float64(t.Coast) * 0.8,
+	}
+	res = DBConn.Save(&p)
+	if res.Error != nil {
+		return nil, res.Error
 	}
 
 	return purchase, nil
 }
 
 // DeletePurchase is the resolver for the deletePurchase field.
-func (r *mutationResolver) DeletePurchase(ctx context.Context, id string) (*model.Purchase, error) {
+func (r *mutationResolver) DeletePurchase(ctx context.Context, id string) (string, error) {
 	p := model.PurchaseDB{ID: id}
 	res := DBConn.Delete(&p)
 	if res.Error != nil {
-		return nil, res.Error
+		return "", res.Error
 	}
 
-	return nil, nil
+	return "Succeed", nil
 }
 
 // Purchases is the resolver for the purchases field.
@@ -80,14 +97,36 @@ func (r *queryResolver) Purchases(ctx context.Context, customerID string) ([]*mo
 		return nil, res.Error
 	}
 
+	c := model.CustomerDB{ID: customerID}
+	res = DBConn.First(&c)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
 	var purchases []*model.Purchase
 	for _, p := range ps {
+		t := model.TrainingDB{ID: p.TrainingID}
+		res = DBConn.First(&t)
+		if res.Error != nil {
+			return nil, res.Error
+		}
+
 		purchases = append(purchases, &model.Purchase{
-			ID:       p.ID,
-			Training: &model.Training{ID: p.TrainingID},
-			Customer: &model.Customer{ID: customerID},
-			Coast:    p.Coast,
-			Income:   p.Income,
+			ID: p.ID,
+			Training: &model.Training{
+				ID:       t.ID,
+				Category: t.Category,
+				Coast:    t.Coast,
+				Gym:      nil,
+			},
+			Customer: &model.Customer{
+				ID:       c.ID,
+				Name:     c.Name,
+				Email:    c.Email,
+				Register: nil,
+			},
+			Coast:  p.Coast,
+			Income: p.Income,
 		})
 	}
 
