@@ -66,16 +66,14 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateCustomer   func(childComplexity int, customer model.CustomerCreate) int
 		CreateGym        func(childComplexity int, gym model.GymCreate) int
-		CreatePurchase   func(childComplexity int, purchase model.PurchaseCreate) int
 		CreateTraining   func(childComplexity int, training model.TrainingCreate) int
 		DeleteCustomer   func(childComplexity int, id string) int
 		DeleteGym        func(childComplexity int, id string) int
 		DeletePurchase   func(childComplexity int, id string) int
 		DeleteTraining   func(childComplexity int, id string) int
-		PurchaseTraining func(childComplexity int, trainingID string) int
+		PurchaseTraining func(childComplexity int, trainingID string, customerID string) int
 		UpdateCustomer   func(childComplexity int, customer model.CustomerUpdate) int
 		UpdateGym        func(childComplexity int, gym model.GymUpdate) int
-		UpdatePurchase   func(childComplexity int, purchase model.PurchaseUpdate) int
 		UpdateTraining   func(childComplexity int, training model.TrainingUpdate) int
 	}
 
@@ -115,10 +113,8 @@ type MutationResolver interface {
 	CreateCustomer(ctx context.Context, customer model.CustomerCreate) (*model.Customer, error)
 	UpdateCustomer(ctx context.Context, customer model.CustomerUpdate) (*model.Customer, error)
 	DeleteCustomer(ctx context.Context, id string) (*model.Customer, error)
-	CreatePurchase(ctx context.Context, purchase model.PurchaseCreate) (*model.Purchase, error)
-	UpdatePurchase(ctx context.Context, purchase model.PurchaseUpdate) (*model.Purchase, error)
 	DeletePurchase(ctx context.Context, id string) (*model.Purchase, error)
-	PurchaseTraining(ctx context.Context, trainingID string) (*model.Purchase, error)
+	PurchaseTraining(ctx context.Context, trainingID string, customerID string) (*model.Purchase, error)
 }
 type QueryResolver interface {
 	Trainings(ctx context.Context) ([]*model.Training, error)
@@ -243,18 +239,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateGym(childComplexity, args["gym"].(model.GymCreate)), true
 
-	case "Mutation.createPurchase":
-		if e.complexity.Mutation.CreatePurchase == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createPurchase_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreatePurchase(childComplexity, args["purchase"].(model.PurchaseCreate)), true
-
 	case "Mutation.createTraining":
 		if e.complexity.Mutation.CreateTraining == nil {
 			break
@@ -325,7 +309,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PurchaseTraining(childComplexity, args["trainingId"].(string)), true
+		return e.complexity.Mutation.PurchaseTraining(childComplexity, args["trainingId"].(string), args["customerId"].(string)), true
 
 	case "Mutation.updateCustomer":
 		if e.complexity.Mutation.UpdateCustomer == nil {
@@ -350,18 +334,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateGym(childComplexity, args["gym"].(model.GymUpdate)), true
-
-	case "Mutation.updatePurchase":
-		if e.complexity.Mutation.UpdatePurchase == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updatePurchase_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdatePurchase(childComplexity, args["purchase"].(model.PurchaseUpdate)), true
 
 	case "Mutation.updateTraining":
 		if e.complexity.Mutation.UpdateTraining == nil {
@@ -524,9 +496,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCustomerUpdate,
 		ec.unmarshalInputGymCreate,
 		ec.unmarshalInputGymUpdate,
-		ec.unmarshalInputPurchaseCreate,
-		ec.unmarshalInputPurchaseInput,
-		ec.unmarshalInputPurchaseUpdate,
 		ec.unmarshalInputTrainingCreate,
 		ec.unmarshalInputTrainingUpdate,
 	)
@@ -675,21 +644,6 @@ func (ec *executionContext) field_Mutation_createGym_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createPurchase_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.PurchaseCreate
-	if tmp, ok := rawArgs["purchase"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purchase"))
-		arg0, err = ec.unmarshalNPurchaseCreate2gymbossᚋgraphᚋmodelᚐPurchaseCreate(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["purchase"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_createTraining_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -777,6 +731,15 @@ func (ec *executionContext) field_Mutation_purchaseTraining_args(ctx context.Con
 		}
 	}
 	args["trainingId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["customerId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customerId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerId"] = arg1
 	return args, nil
 }
 
@@ -807,21 +770,6 @@ func (ec *executionContext) field_Mutation_updateGym_args(ctx context.Context, r
 		}
 	}
 	args["gym"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updatePurchase_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.PurchaseUpdate
-	if tmp, ok := rawArgs["purchase"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purchase"))
-		arg0, err = ec.unmarshalNPurchaseUpdate2gymbossᚋgraphᚋmodelᚐPurchaseUpdate(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["purchase"] = arg0
 	return args, nil
 }
 
@@ -1126,9 +1074,9 @@ func (ec *executionContext) _Customer_register(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*model.Purchase)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNPurchase2ᚕᚖgymbossᚋgraphᚋmodelᚐPurchaseᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Customer_register(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1138,7 +1086,19 @@ func (ec *executionContext) fieldContext_Customer_register(ctx context.Context, 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Purchase_id(ctx, field)
+			case "training":
+				return ec.fieldContext_Purchase_training(ctx, field)
+			case "customer":
+				return ec.fieldContext_Purchase_customer(ctx, field)
+			case "coast":
+				return ec.fieldContext_Purchase_coast(ctx, field)
+			case "income":
+				return ec.fieldContext_Purchase_income(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Purchase", field.Name)
 		},
 	}
 	return fc, nil
@@ -1346,9 +1306,9 @@ func (ec *executionContext) _Gym_trainings(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Training)
+	res := resTmp.([]*model.Training)
 	fc.Result = res
-	return ec.marshalNTraining2ᚖgymbossᚋgraphᚋmodelᚐTraining(ctx, field.Selections, res)
+	return ec.marshalNTraining2ᚕᚖgymbossᚋgraphᚋmodelᚐTrainingᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Gym_trainings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2015,140 +1975,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteCustomer(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_createPurchase(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createPurchase(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePurchase(rctx, fc.Args["purchase"].(model.PurchaseCreate))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Purchase)
-	fc.Result = res
-	return ec.marshalNPurchase2ᚖgymbossᚋgraphᚋmodelᚐPurchase(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createPurchase(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Purchase_id(ctx, field)
-			case "training":
-				return ec.fieldContext_Purchase_training(ctx, field)
-			case "customer":
-				return ec.fieldContext_Purchase_customer(ctx, field)
-			case "coast":
-				return ec.fieldContext_Purchase_coast(ctx, field)
-			case "income":
-				return ec.fieldContext_Purchase_income(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Purchase", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createPurchase_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updatePurchase(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updatePurchase(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePurchase(rctx, fc.Args["purchase"].(model.PurchaseUpdate))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Purchase)
-	fc.Result = res
-	return ec.marshalNPurchase2ᚖgymbossᚋgraphᚋmodelᚐPurchase(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updatePurchase(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Purchase_id(ctx, field)
-			case "training":
-				return ec.fieldContext_Purchase_training(ctx, field)
-			case "customer":
-				return ec.fieldContext_Purchase_customer(ctx, field)
-			case "coast":
-				return ec.fieldContext_Purchase_coast(ctx, field)
-			case "income":
-				return ec.fieldContext_Purchase_income(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Purchase", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updatePurchase_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_deletePurchase(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_deletePurchase(ctx, field)
 	if err != nil {
@@ -2230,7 +2056,7 @@ func (ec *executionContext) _Mutation_purchaseTraining(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PurchaseTraining(rctx, fc.Args["trainingId"].(string))
+		return ec.resolvers.Mutation().PurchaseTraining(rctx, fc.Args["trainingId"].(string), fc.Args["customerId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2505,9 +2331,9 @@ func (ec *executionContext) _Purchase_income(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Purchase_income(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2517,7 +2343,7 @@ func (ec *executionContext) fieldContext_Purchase_income(ctx context.Context, fi
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5067,7 +4893,7 @@ func (ec *executionContext) unmarshalInputCustomerCreate(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "email", "register"}
+	fieldsInOrder := [...]string{"name", "email"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5092,15 +4918,6 @@ func (ec *executionContext) unmarshalInputCustomerCreate(ctx context.Context, ob
 				return it, err
 			}
 			it.Email = data
-		case "register":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("register"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Register = data
 		}
 	}
 
@@ -5114,13 +4931,22 @@ func (ec *executionContext) unmarshalInputCustomerUpdate(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "email", "register"}
+	fieldsInOrder := [...]string{"id", "name", "email"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "name":
 			var err error
 
@@ -5139,15 +4965,6 @@ func (ec *executionContext) unmarshalInputCustomerUpdate(ctx context.Context, ob
 				return it, err
 			}
 			it.Email = data
-		case "register":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("register"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Register = data
 		}
 	}
 
@@ -5161,7 +4978,7 @@ func (ec *executionContext) unmarshalInputGymCreate(ctx context.Context, obj int
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"branch", "admin", "phone", "trainingIDs", "slots"}
+	fieldsInOrder := [...]string{"branch", "admin", "phone", "slots"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5195,15 +5012,6 @@ func (ec *executionContext) unmarshalInputGymCreate(ctx context.Context, obj int
 				return it, err
 			}
 			it.Phone = data
-		case "trainingIDs":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("trainingIDs"))
-			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TrainingIDs = data
 		case "slots":
 			var err error
 
@@ -5226,13 +5034,22 @@ func (ec *executionContext) unmarshalInputGymUpdate(ctx context.Context, obj int
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"branch", "admin", "phone", "trainingIDs", "slots"}
+	fieldsInOrder := [...]string{"id", "branch", "admin", "phone", "slots"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "branch":
 			var err error
 
@@ -5260,15 +5077,6 @@ func (ec *executionContext) unmarshalInputGymUpdate(ctx context.Context, obj int
 				return it, err
 			}
 			it.Phone = data
-		case "trainingIDs":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("trainingIDs"))
-			data, err := ec.unmarshalOID2ᚕᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TrainingIDs = data
 		case "slots":
 			var err error
 
@@ -5278,156 +5086,6 @@ func (ec *executionContext) unmarshalInputGymUpdate(ctx context.Context, obj int
 				return it, err
 			}
 			it.Slots = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputPurchaseCreate(ctx context.Context, obj interface{}) (model.PurchaseCreate, error) {
-	var it model.PurchaseCreate
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"training", "customer", "coast", "income"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "training":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("training"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Training = data
-		case "customer":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customer"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Customer = data
-		case "coast":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coast"))
-			data, err := ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Coast = data
-		case "income":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("income"))
-			data, err := ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Income = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputPurchaseInput(ctx context.Context, obj interface{}) (model.PurchaseInput, error) {
-	var it model.PurchaseInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"coast", "income"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "coast":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coast"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Coast = data
-		case "income":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("income"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Income = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputPurchaseUpdate(ctx context.Context, obj interface{}) (model.PurchaseUpdate, error) {
-	var it model.PurchaseUpdate
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"training", "customer", "coast", "income"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "training":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("training"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Training = data
-		case "customer":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customer"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Customer = data
-		case "coast":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coast"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Coast = data
-		case "income":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("income"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Income = data
 		}
 	}
 
@@ -5488,13 +5146,22 @@ func (ec *executionContext) unmarshalInputTrainingUpdate(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"category", "coast", "gymID"}
+	fieldsInOrder := [...]string{"id", "category", "coast", "gymID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "category":
 			var err error
 
@@ -5732,20 +5399,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteCustomer":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteCustomer(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createPurchase":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createPurchase(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updatePurchase":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updatePurchase(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6469,6 +6122,21 @@ func (ec *executionContext) unmarshalNCustomerUpdate2gymbossᚋgraphᚋmodelᚐC
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) marshalNGym2gymbossᚋgraphᚋmodelᚐGym(ctx context.Context, sel ast.SelectionSet, v model.Gym) graphql.Marshaler {
 	return ec._Gym(ctx, sel, &v)
 }
@@ -6552,38 +6220,6 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
-	}
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6655,16 +6291,6 @@ func (ec *executionContext) marshalNPurchase2ᚖgymbossᚋgraphᚋmodelᚐPurcha
 		return graphql.Null
 	}
 	return ec._Purchase(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNPurchaseCreate2gymbossᚋgraphᚋmodelᚐPurchaseCreate(ctx context.Context, v interface{}) (model.PurchaseCreate, error) {
-	res, err := ec.unmarshalInputPurchaseCreate(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNPurchaseUpdate2gymbossᚋgraphᚋmodelᚐPurchaseUpdate(ctx context.Context, v interface{}) (model.PurchaseUpdate, error) {
-	res, err := ec.unmarshalInputPurchaseUpdate(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -7027,38 +6653,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) unmarshalOID2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOID2ᚖstring(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOID2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOID2ᚖstring(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

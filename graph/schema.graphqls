@@ -16,6 +16,7 @@ input TrainingCreate {
 }
 
 input TrainingUpdate {
+  id: ID!
   category: String
   coast: Int
   gymID: ID
@@ -26,7 +27,7 @@ type Gym {
   branch: String!
   admin: String!
   phone: String!
-  trainings: Training!
+  trainings: [Training!]!
   slots: Int!
 }
 
@@ -34,15 +35,14 @@ input GymCreate {
   branch: String!
   admin: String!
   phone: String!
-  trainingIDs: [ID!]!
   slots: Int!
 }
 
 input GymUpdate {
+  id: ID!
   branch: String
   admin: String
   phone: String
-  trainingIDs: [ID]
   slots: Int
 }
 
@@ -50,19 +50,18 @@ type Customer {
   id: ID!
   name: String!
   email: String!
-  register: String!
+  register: [Purchase!]!
 }
 
 input CustomerCreate {
   name: String!
   email: String!
-  register: String!
 }
 
 input CustomerUpdate {
+  id: ID!
   name: String
   email: String
-  register: String
 }
 
 type Purchase {
@@ -70,29 +69,10 @@ type Purchase {
   training: Training!
   customer: Customer!
   coast: Int!
-  income: Int!
+  income: Float!
 }
 
-input PurchaseCreate {
-  training: ID!
-  customer: ID!
-  coast: Int!
-  income: Int!
-}
 
-input PurchaseUpdate {
-  training: ID
-  customer: ID
-  coast: Int
-  income: Int
-}
-
-input PurchaseInput {
-#  training: TrainingInput
-#  customer: CustomerInput
-  coast: Int
-  income: Int
-}
 
 type Query {
   trainings: [Training!]!
@@ -122,9 +102,7 @@ type Mutation {
   updateCustomer(customer: CustomerUpdate!): Customer!
   deleteCustomer(id: ID!): Customer!
 
-  createPurchase(purchase: PurchaseCreate!): Purchase!
-  updatePurchase(purchase: PurchaseUpdate!): Purchase!
   deletePurchase(id: ID!): Purchase!
+  purchaseTraining (trainingId: ID!, customerId: ID!): Purchase!
 
-  purchaseTraining (trainingId: ID!): Purchase!
 }

@@ -3,47 +3,45 @@
 package model
 
 type Customer struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Register string `json:"register"`
+	ID       string      `json:"id"`
+	Name     string      `json:"name"`
+	Email    string      `json:"email"`
+	Register []*Purchase `json:"register"`
 }
 
 type CustomerCreate struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Register string `json:"register"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type CustomerUpdate struct {
-	Name     *string `json:"name,omitempty"`
-	Email    *string `json:"email,omitempty"`
-	Register *string `json:"register,omitempty"`
+	ID    string  `json:"id"`
+	Name  *string `json:"name,omitempty"`
+	Email *string `json:"email,omitempty"`
 }
 
 type Gym struct {
-	ID        string    `json:"id"`
-	Branch    string    `json:"branch"`
-	Admin     string    `json:"admin"`
-	Phone     string    `json:"phone"`
-	Trainings *Training `json:"trainings"`
-	Slots     int       `json:"slots"`
+	ID        string      `json:"id"`
+	Branch    string      `json:"branch"`
+	Admin     string      `json:"admin"`
+	Phone     string      `json:"phone"`
+	Trainings []*Training `json:"trainings"`
+	Slots     int         `json:"slots"`
 }
 
 type GymCreate struct {
-	Branch      string   `json:"branch"`
-	Admin       string   `json:"admin"`
-	Phone       string   `json:"phone"`
-	TrainingIDs []string `json:"trainingIDs"`
-	Slots       int      `json:"slots"`
+	Branch string `json:"branch"`
+	Admin  string `json:"admin"`
+	Phone  string `json:"phone"`
+	Slots  int    `json:"slots"`
 }
 
 type GymUpdate struct {
-	Branch      *string   `json:"branch,omitempty"`
-	Admin       *string   `json:"admin,omitempty"`
-	Phone       *string   `json:"phone,omitempty"`
-	TrainingIDs []*string `json:"trainingIDs,omitempty"`
-	Slots       *int      `json:"slots,omitempty"`
+	ID     string  `json:"id"`
+	Branch *string `json:"branch,omitempty"`
+	Admin  *string `json:"admin,omitempty"`
+	Phone  *string `json:"phone,omitempty"`
+	Slots  *int    `json:"slots,omitempty"`
 }
 
 type Purchase struct {
@@ -51,26 +49,7 @@ type Purchase struct {
 	Training *Training `json:"training"`
 	Customer *Customer `json:"customer"`
 	Coast    int       `json:"coast"`
-	Income   int       `json:"income"`
-}
-
-type PurchaseCreate struct {
-	Training string `json:"training"`
-	Customer string `json:"customer"`
-	Coast    int    `json:"coast"`
-	Income   int    `json:"income"`
-}
-
-type PurchaseInput struct {
-	Coast  *int `json:"coast,omitempty"`
-	Income *int `json:"income,omitempty"`
-}
-
-type PurchaseUpdate struct {
-	Training *string `json:"training,omitempty"`
-	Customer *string `json:"customer,omitempty"`
-	Coast    *int    `json:"coast,omitempty"`
-	Income   *int    `json:"income,omitempty"`
+	Income   float64   `json:"income"`
 }
 
 type Training struct {
@@ -87,6 +66,7 @@ type TrainingCreate struct {
 }
 
 type TrainingUpdate struct {
+	ID       string  `json:"id"`
 	Category *string `json:"category,omitempty"`
 	Coast    *int    `json:"coast,omitempty"`
 	GymID    *string `json:"gymID,omitempty"`
